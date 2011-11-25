@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.001';
+$Test::Lite::VERSION = '0.002';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -51,6 +51,7 @@ sub import {
     $CLASS->_export_defs(qw/
         is
         ok
+        has
         cmp_ok
         diff
         diag 
@@ -61,6 +62,7 @@ sub import {
         like
         explain
         methods
+        subtest
         todo_start
         todo_end
         done_testing
@@ -315,6 +317,55 @@ sub methods {
     return join "\n", @m;
 }
 
+sub subtest {
+    my ($name, $subtest) = @_;
+    my $tb = $CLASS->builder;
+    $tb->subtest($name, $subtest);
+}
+
+sub deep_keys {
+    my ($self, $hashref, $code, $args) = @_;
+
+    while (my ($k, $v) = each(%$hashref)) {
+        my @newargs = defined($args) ? @$args : ();
+        push(@newargs, $k);
+        if (ref($v) eq 'HASH') {
+            $CLASS->deep_keys($v, $code, \@newargs);
+        }
+        else {
+            $code->(@newargs);
+        }
+    }
+}
+
+sub has {
+    my ($refvar, $key, $name) = @_;
+    my $tb = $CLASS->builder;
+    if (! ref($refvar)) {
+        $tb->skip('First parameter must be reference');
+        return 1;
+    }
+    
+    if (ref($refvar) eq 'HASH') {
+        my $match = 0;
+        $CLASS->deep_keys($refvar, sub {
+            $match = 1
+                if grep { $_ eq $key } @_;
+        });
+
+        if ($match) { $tb->ok(1, $name); }
+        else { $tb->ok(0, $name); }
+    }
+    elsif (ref($refvar) eq 'ARRAY') {
+        if ( grep { $_ eq $key } @$refvar ) {
+            $tb->ok(1, $name);
+        }
+        else {
+            $tb->ok(0, $name);
+        }
+    }
+}
+
 sub done_testing {
     my ($num) = @_;
     my $tb = $CLASS->builder;
@@ -457,6 +508,43 @@ to check against.
     
     is_ref(@non_ref, 'Name of test');
     is_ref($true_ref => 'HASH', 'Name of test'); # Checks to see if $true_ref returns a HASH
+
+=head2 subtest
+
+Create subtests within a test.
+
+    use Test::Lite;
+
+    use_ok 'Some::Module';
+    
+    subtest 'My test name' => sub {
+        ok ref({}), 'HASH' => 'Reference type is hash';
+    };
+
+    subtest 'Another subtest' => sub {
+        my $ob = Some::Module->new;
+        isa_ok( $ob, 'Some::Module' => 'Matching class with object' );
+    };
+
+=head2 has
+
+Searches an ArrayRef or HashRef (deeply) for a specific element or key.
+
+    my $hash = {
+        name => 'World',
+        foo  => 'baz',
+        berry => {
+            fruit => {
+                melon => 'Yum!',
+            },
+        },
+    };
+
+    has $hash, 'melon' => 'Found melon!';
+
+    my $ary = [qw(this that there where who what)];
+
+    has $ary, 'there' => 'Found "there" in arrayref'; 
 
 =cut
 

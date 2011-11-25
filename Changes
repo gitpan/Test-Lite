@@ -1,5 +1,10 @@
 Revision history for Test-Lite
 
+0.002   25/Nov/2011
+        Added support for subtests. Use "subtest 'name' => sub { ... };"
+        New 'has' method can search hashrefs deeply for a specific key, or an arrayref for a
+            particular element.
+
 0.001   24/Nov/2011
         First version, released on an unsuspecting world.
 
