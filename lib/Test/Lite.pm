@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.002';
+$Test::Lite::VERSION = '0.003';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -54,7 +54,8 @@ sub import {
         has
         cmp_ok
         diff
-        diag 
+        diag
+        plan 
         use_ok
         can_ok
         isa_ok
@@ -65,6 +66,9 @@ sub import {
         subtest
         todo_start
         todo_end
+        is_passing
+        level
+        caller
         done_testing
     /);
 }
@@ -366,6 +370,26 @@ sub has {
     }
 }
 
+sub plan {
+    my $tb = $CLASS->builder;
+    $tb->plan(@_);
+}
+
+sub is_passing {
+    my $tb = $CLASS->builder;
+    $tb->is_passing;
+}
+
+sub level {
+    my $tb = $CLASS->builder;
+    $tb->level(@_);
+}
+
+sub caller {
+    my $tb = $CLASS->builder;
+    $tb->caller(@_);
+}
+
 sub done_testing {
     my ($num) = @_;
     my $tb = $CLASS->builder;
@@ -545,6 +569,22 @@ Searches an ArrayRef or HashRef (deeply) for a specific element or key.
     my $ary = [qw(this that there where who what)];
 
     has $ary, 'there' => 'Found "there" in arrayref'; 
+
+=head2 plan
+
+Declare how many tests you are going to run. This is not needed if you have included C<done_testing>
+
+    use Test::Lite;
+
+    plan tests => 2;
+    plan 'no_plan';
+    plan skip_all => 'reason';
+
+=head2 is_passing
+
+Detects whether the current test suite is passing.
+
+    is_passing or diag "Uh-Oh. We're currently failing the test..."
 
 =cut
 

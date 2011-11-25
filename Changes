@@ -1,5 +1,9 @@
 Revision history for Test-Lite
 
+0.003   25/Nov/2011
+        New method 'plan' added to plan the number of tests.
+        Added is_passing, level and caller.
+
 0.002   25/Nov/2011
         Added support for subtests. Use "subtest 'name' => sub { ... };"
         New 'has' method can search hashrefs deeply for a specific key, or an arrayref for a
