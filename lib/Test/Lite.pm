@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.003';
+$Test::Lite::VERSION = '0.004';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -46,8 +46,14 @@ extends 'Test::Builder::Module';
 my $CLASS = __PACKAGE__;
 
 sub import {
-    my ($class, $args) = @_;
+    my ($class, @args) = @_;
     my $pkg = caller(1);
+    for (@args) {
+        if ($_ eq ':strict') {
+            warnings->import;
+            strict->import;
+        }
+    }
     $CLASS->_export_defs(qw/
         is
         ok
@@ -67,8 +73,10 @@ sub import {
         todo_start
         todo_end
         is_passing
+        count
+        note
         level
-        caller
+        finfo
         done_testing
     /);
 }
@@ -385,9 +393,53 @@ sub level {
     $tb->level(@_);
 }
 
-sub caller {
+sub finfo {
     my $tb = $CLASS->builder;
     $tb->caller(@_);
+}
+
+sub note {
+    my $tb = $CLASS->builder;
+    $tb->note(@_);
+}
+
+sub count {
+    my ($v, $c, $name) = @_;
+    my $tb = $CLASS->builder;
+    if (! ref($v)) {
+        $CLASS->syntax_fail( "count(): First parameter must be a reference" );
+        return 1;
+    }
+    else {
+        if (! looks_like_number($c)) {
+            $CLASS->syntax_fail( "Can't match against a non-numeric value" );
+            return 1;
+        }
+       
+        if (ref($v) eq 'ARRAY') {
+            my $num = scalar @$v;
+            if ($num != $c) { $CLASS->fail($name||"count(): Number of elements do not match"); }
+            else { $tb->ok(1, $name||"count(): Number of elements match"); }
+        }
+        elsif (ref($v) eq 'HASH') {
+            my $num = scalar keys %$v;
+            if ($num != $c) { $CLASS->fail($name||"count(): Number of keys do not mach"); }
+            else { $tb->ok(1, $name||"count(): Number of keys match"); }
+        }
+    }
+}
+
+sub fail {
+    my ($self, $message) = @_;
+    my $tb = $CLASS->builder;
+    $tb->ok(0, $message);
+}
+
+sub syntax_fail {
+    my ($self, $message) = @_;
+    my $tb = $CLASS->builder;
+    if ($self->dieonsyntax) { $tb->ok(0, $message); }
+    else { $tb->skip($message); }
 }
 
 sub done_testing {
@@ -585,6 +637,33 @@ Declare how many tests you are going to run. This is not needed if you have incl
 Detects whether the current test suite is passing.
 
     is_passing or diag "Uh-Oh. We're currently failing the test..."
+
+=head2 note
+
+Just prints text to output(), so it should only be displayed in verbose mode.
+
+    note 'Some note to describe stuff';
+
+=head2 count
+
+Counts the number of keys from a hashref, or elements from an arrayref and matches them against the expected value.
+
+    my $h = {
+        foo => 'bar',
+        baz => 'foo'
+    };
+    count $h, 2 => 'Expecting 2 keys in hash';
+
+    my $a = [1, 2, 3, 4];
+    count $a, $a->[3] => "Expecting $a->[3] elements from array";
+
+=head1 AUTHOR
+
+Brad Haywood <brad@geeksware.net>
+
+=head1 LICENSE
+
+You may distribute this code under the same terms as Perl itself.
 
 =cut
 

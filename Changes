@@ -1,8 +1,15 @@
 Revision history for Test-Lite
 
+0.004   25/Nov/2011
+        You can now switch on 'strict' and 'warnings' at the same time just by importing ':strict'
+            use Test::Lite ':strict';
+        Added count method. Counts the number of keys from a hashref, or elements from an arrayref
+            count { name => 'World' }, 1 => 'Count number of keys';
+        Added note method. Just displays text to output(), so only available during verbose
+
 0.003   25/Nov/2011
         New method 'plan' added to plan the number of tests.
-        Added is_passing, level and caller.
+        Added is_passing, level and finfo.
 
 0.002   25/Nov/2011
         Added support for subtests. Use "subtest 'name' => sub { ... };"
