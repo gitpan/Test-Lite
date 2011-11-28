@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.004';
+$Test::Lite::VERSION = '0.005';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -68,6 +68,7 @@ sub import {
         is_ref
         like
         explain
+        extended
         methods
         subtest
         todo_start
@@ -142,6 +143,49 @@ sub is {
             }
             else { $tb->is_eq($a, $b, $name); }
         }
+    }
+}
+
+sub extended {
+    my ($mother, @base) = @_;
+    my $tb = $CLASS->builder;
+    my $test = $tb->current_test();
+    my @extends;
+    no strict 'refs';
+    my $mom = $mother;
+    $mother = "$mother\::";
+    for my $child (@base) {
+        foreach my $key (keys \%{$mother}) {
+            if (substr($key, -2, -1) eq ':') {
+                push @extends, substr("$mother$key", 0, -2);
+            }
+        }
+    }
+    $mother = "";
+    for $mother (@extends) {
+        DEEP_SEARCH: foreach my $key (keys %{"$mother\::"}) {
+            if (substr($key, -2, -1) eq ':') {
+                push @extends, "$mother\::" . substr("$key", 0, -2);
+            }
+            if (scalar keys %{$key} > 0) {
+                $mother = "$mother$key";
+                next DEEP_SEARCH;
+            }
+        }
+    }
+    if (scalar @extends > 0) {
+        for my $extend (@base) {
+            if (! grep { $_ eq $extend } @extends) {
+                $tb->ok(0, "$mom does not extend $extend");
+                return 1;
+            }
+        }
+        $tb->ok(1, "$mom extends " . join(q{, }, @base));
+        return 0;
+    }
+    else {
+        $tb->skip("No extends found in $mom, so let's move on");
+        return 0;
     }
 }
 
@@ -224,20 +268,13 @@ sub diff {
 }
 
 sub can_ok {
-    my ($module, $methods, $name) = @_;
+    my ($module, @methods) = @_;
     my $tb = $CLASS->builder;
 
     my $test = $tb->current_test;
-    if (ref($methods) ne 'ARRAY') {
-        my $err = "List of methods for 'can_ok' must be an ArrayRef";
-        if ($CLASS->dieonsyntax) { say "not ok $test - $err"; }
-        else { $tb->skip($err); }
-        return 1;
-    }
-    $name = "Checking methods in $module"
-        if ! $name;
+    my $name = "Checking methods in $module";
     $tb->subtest( $name, sub {
-        for (@$methods) {
+        for (@methods) {
             $tb->ok($module->can($_), "$module has method $_");
         }
     });
@@ -337,7 +374,6 @@ sub subtest {
 
 sub deep_keys {
     my ($self, $hashref, $code, $args) = @_;
-
     while (my ($k, $v) = each(%$hashref)) {
         my @newargs = defined($args) ? @$args : ();
         push(@newargs, $k);
@@ -513,7 +549,7 @@ the output of what C<diff> was expecting, and what it actually got
 
 Finds out whether the specified module can call on certain methods.
 
-    can_ok 'Foo' => [qw( this that them who what )];
+    can_ok 'Foo' => qw/ this that them who what /;
 
 =head2 isa_ok
 
@@ -656,6 +692,32 @@ Counts the number of keys from a hashref, or elements from an arrayref and match
 
     my $a = [1, 2, 3, 4];
     count $a, $a->[3] => "Expecting $a->[3] elements from array";
+
+=head2 extended
+
+Searches the module deeply for extended modules. ie: When you C<use base 'Module'> or C<extends> in most OOP frameworks. 
+
+    package Foo;
+    
+    use base qw/
+        Foo::Baz
+        Foo::Baz::Foobar
+        Foo::Baz::Foobar::Frag
+    /;
+    
+    1;
+
+    # t/01-extends.t
+
+    use Test::Lite;
+    
+    use_ok 'Foo';
+    extended 'Foo' => qw/
+        Foo::Baz
+        Foo::Baz::Foobar::Frag
+    /;
+    
+    done_testing;
 
 =head1 AUTHOR
 

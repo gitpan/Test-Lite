@@ -1,5 +1,10 @@
 Revision history for Test-Lite
 
+0.005   28/Nov/2011
+        Changed syntax for can_ok. Please use 'can_ok "Module", qw/array of methods/' or simply 
+            can_ok "Module", "method";
+        Added 'extended' method to search deeply for "extended" modules. ie: use base 'Blah';
+
 0.004   25/Nov/2011
         You can now switch on 'strict' and 'warnings' at the same time just by importing ':strict'
             use Test::Lite ':strict';
