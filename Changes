@@ -1,5 +1,8 @@
 Revision history for Test-Lite
 
+0.006   29/Nov/2011
+        "has" changed to "has_key". Was getting annoying when testing with Goose, Moose, Mouse, etc.
+
 0.005   28/Nov/2011
         Changed syntax for can_ok. Please use 'can_ok "Module", qw/array of methods/' or simply 
             can_ok "Module", "method";

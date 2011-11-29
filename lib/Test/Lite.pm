@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.005';
+$Test::Lite::VERSION = '0.006';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -57,7 +57,7 @@ sub import {
     $CLASS->_export_defs(qw/
         is
         ok
-        has
+        has_key
         cmp_ok
         diff
         diag
@@ -386,7 +386,7 @@ sub deep_keys {
     }
 }
 
-sub has {
+sub has_key {
     my ($refvar, $key, $name) = @_;
     my $tb = $CLASS->builder;
     if (! ref($refvar)) {
