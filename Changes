@@ -1,5 +1,8 @@
 Revision history for Test-Lite
 
+0.007   02/Dec/2011
+        Looks like Test::Lite itself was failing tests. Hopefully fixed this issue, with any luck.
+
 0.006   29/Nov/2011
         "has" changed to "has_key". Was getting annoying when testing with Goose, Moose, Mouse, etc.
 

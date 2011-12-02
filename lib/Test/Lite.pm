@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.006';
+$Test::Lite::VERSION = '0.007';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -155,7 +155,7 @@ sub extended {
     my $mom = $mother;
     $mother = "$mother\::";
     for my $child (@base) {
-        foreach my $key (keys \%{$mother}) {
+        foreach my $key (keys %{$mother}) {
             if (substr($key, -2, -1) eq ':') {
                 push @extends, substr("$mother$key", 0, -2);
             }
@@ -638,7 +638,7 @@ Create subtests within a test.
         isa_ok( $ob, 'Some::Module' => 'Matching class with object' );
     };
 
-=head2 has
+=head2 has_key
 
 Searches an ArrayRef or HashRef (deeply) for a specific element or key.
 
@@ -652,11 +652,11 @@ Searches an ArrayRef or HashRef (deeply) for a specific element or key.
         },
     };
 
-    has $hash, 'melon' => 'Found melon!';
+    has_key $hash, 'melon' => 'Found melon!';
 
     my $ary = [qw(this that there where who what)];
 
-    has $ary, 'there' => 'Found "there" in arrayref'; 
+    has_key $ary, 'there' => 'Found "there" in arrayref'; 
 
 =head2 plan
 

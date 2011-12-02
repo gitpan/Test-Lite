@@ -7,7 +7,7 @@ license  'perl';
 
 build_requires 'Test::More';
 requires 'Test::Builder' => '0.98';
-requires 'Goose' => '0.002';
+requires 'Goose' => '0.007';
 
 auto_install;
 
