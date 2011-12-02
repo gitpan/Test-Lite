@@ -21,9 +21,8 @@ no_index:
     - inc
     - t
 requires:
-  Goose: 0.007
-  Test::Builder: 0.98
+  Goose: 0
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.007
+version: 0.008

@@ -1,6 +1,6 @@
 package Test::Lite;
 
-$Test::Lite::VERSION = '0.007';
+$Test::Lite::VERSION = '0.008';
 $Test::Lite::DieOnSyntaxError = 0;
 
 =head1 NAME
@@ -39,7 +39,7 @@ use warnings;
 
 use 5.010;
 use Scalar::Util 'looks_like_number';
-use Goose qw/:Class/;
+use Goose qw/:Antlers/;
 
 extends 'Test::Builder::Module';
 

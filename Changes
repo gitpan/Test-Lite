@@ -1,5 +1,8 @@
 Revision history for Test-Lite
 
+0.008   02/Dec/2011
+        Test::Lite and Goose requiring each other was NOT a good idea
+
 0.007   02/Dec/2011
         Looks like Test::Lite itself was failing tests. Hopefully fixed this issue, with any luck.
 
