@@ -6,7 +6,9 @@ author   q{Brad Haywood <brad@geeksware.net>};
 license  'perl';
 
 build_requires 'Test::More';
-requires 'Goose';
+requires 'Scalar::Util';
+requires 'Test::Builder::Module';
+requires 'Sub::Mage' => '0.020';
 
 auto_install;
 
